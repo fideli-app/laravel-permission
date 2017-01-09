@@ -36,6 +36,21 @@ class RoleOrPermissionDescriptor
     }
 
     /**
+     * @param Model $pivotOwner
+     * @return RoleOrPermissionDescriptor
+     */
+    public static function fromPivot( Model $pivotOwner ): RoleOrPermissionDescriptor
+    {
+        $hasTarget = ($type = $pivotOwner->target_type) && ($id = $pivotOwner->target_id);
+        $meta      = [
+            'name'   => $pivotOwner->name,
+            'target' => $hasTarget ? compact('type', 'id') : NULL
+        ];
+
+        return new self($meta);
+    }
+
+    /**
      * @return string
      */
     public function getCode(): string
