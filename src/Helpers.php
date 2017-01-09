@@ -31,13 +31,13 @@ abstract class Helpers
 
     /**
      * @param string $code
-     * @param bool $loadTarget
+     * @param bool $resolveTarget
      * @param string $roleOrPermissionName
-     * @param array|Model $target
+     * @param array $target
      * @return array
      */
     public static function parse( string $code,
-                                  $loadTarget = FALSE,
+                                  $resolveTarget = FALSE,
                                   &$roleOrPermissionName = NULL,
                                   &$target = NULL ): array
     {
@@ -49,30 +49,50 @@ abstract class Helpers
                 throw new \InvalidArgumentException("Invalid role/permission code: {$code}");
             }
             $roleOrPermissionName = $matches[1];
-            $class                = self::classForKey($matches[2]);
-            if ( $loadTarget )
-            {
-                $target = $class::findOrFail($matches[3]);
-            }
-            else
-            {
-                $target = ['type' => $class, 'id' => $matches[3]];
-            }
+            $target               = ['type' => $matches[2], 'id' => $matches[3]];
+            if ( $resolveTarget ) self::resolveTarget($target);
         }
 
         return ['name' => $roleOrPermissionName, 'target' => $target];
     }
 
     /**
-     * @param Model $target
-     * @return string
+     * @param array|null $target
+     * @return null|Model
      */
-    private function stringifyTarget( Model $target )
+    public static function resolveTarget( &$target )
+    {
+        if ( $target === NULL ) return NULL;
+        if ( ! isset($target['object']) )
+        {
+            $class            = self::classForKey($target['type']);
+            $target['object'] = $class::findOrFail($target['id']);
+        }
+
+        return $target['object'];
+    }
+
+    /**
+     * @param string $roleOrPermissionName
+     * @param Model|NULL $target
+     * @return array
+     */
+    public static function buildMeta( string $roleOrPermissionName, Model $target = NULL ): array
+    {
+        return ['name' => $roleOrPermissionName, 'target' => $target ? self::stringifyTarget($target, TRUE) : NULL];
+    }
+
+    /**
+     * @param Model $target
+     * @return string|array
+     */
+    private function stringifyTarget( Model $target, $asArray = FALSE )
     {
         if ( ! ($id = $target->getKey()) )
         {
             throw new \InvalidArgumentException("Target must be an existing record");
         }
+        if ( $asArray ) return ['type' => self::keyForClass($target), 'id' => $id, 'object' => $target];
 
         return self::keyForClass($target) . ':' . $id;
     }
