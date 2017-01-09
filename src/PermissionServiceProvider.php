@@ -62,29 +62,29 @@ class PermissionServiceProvider extends ServiceProvider
     protected function registerBladeExtensions()
     {
         $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
-            $bladeCompiler->directive('role', function ($role) {
-                return "<?php if(auth()->check() && auth()->user()->hasRole({$role})): ?>";
+            $bladeCompiler->directive('role', function ($expression) {
+                return "<?php if(auth()->check() && auth()->user()->hasRole(Helpers::stringify{$expression})): ?>";
             });
             $bladeCompiler->directive('endrole', function () {
                 return '<?php endif; ?>';
             });
 
-            $bladeCompiler->directive('hasrole', function ($role) {
-                return "<?php if(auth()->check() && auth()->user()->hasRole({$role})): ?>";
+            $bladeCompiler->directive('hasrole', function ($expression) {
+                return "<?php if(auth()->check() && auth()->user()->hasRole(Helpers::stringify{$expression})): ?>";
             });
             $bladeCompiler->directive('endhasrole', function () {
                 return '<?php endif; ?>';
             });
 
-            $bladeCompiler->directive('hasanyrole', function ($roles) {
-                return "<?php if(auth()->check() && auth()->user()->hasAnyRole({$roles})): ?>";
+            $bladeCompiler->directive('hasanyrole', function ($expression) {
+                return "<?php if(auth()->check() && auth()->user()->hasAnyRole(Helpers::stringify{$expression})): ?>";
             });
             $bladeCompiler->directive('endhasanyrole', function () {
                 return '<?php endif; ?>';
             });
 
-            $bladeCompiler->directive('hasallroles', function ($roles) {
-                return "<?php if(auth()->check() && auth()->user()->hasAllRoles({$roles})): ?>";
+            $bladeCompiler->directive('hasallroles', function ($expression) {
+                return "<?php if(auth()->check() && auth()->user()->hasAllRoles(Helpers::stringify{$expression})): ?>";
             });
             $bladeCompiler->directive('endhasallroles', function () {
                 return '<?php endif; ?>';
