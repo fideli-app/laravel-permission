@@ -98,6 +98,16 @@ class RoleOrPermissionDescriptor
     }
 
     /**
+     * @return string|null
+     */
+    public function getPermissibleAsString()
+    {
+        $p = $this->getMeta()['permissible'];
+
+        return $p ? "{$p['type']}:{$p['id']}" : NULL;
+    }
+
+    /**
      * @return null|Model
      */
     public function getPermissibleObject()

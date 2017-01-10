@@ -84,4 +84,28 @@ abstract class acl
         }
         throw new \InvalidArgumentException("Invalid ACL item given: {$item}");
     }
+
+    /**
+     * @param array $codesOrAclList
+     * @return array
+     */
+    public static function groupByPermissible( array $codesOrAclList )
+    {
+        $groups = [];
+        foreach ( $codesOrAclList as $codeOrAcl )
+        {
+            $desc = acl::cast($codeOrAcl);
+            $key  = $desc->getPermissibleAsString() ?: 0;
+            if ( ! isset($groups[$key]) )
+            {
+                $groups[$key] = [
+                    'desc'  => $desc,
+                    'names' => [],
+                ];
+            }
+            $groups[$key]['names'][$desc->getName()] = TRUE;
+        }
+
+        return $groups;
+    }
 }

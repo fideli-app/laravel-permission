@@ -42,7 +42,7 @@ interface User
      * @param Model|NULL $permissible
      * @return bool
      */
-    public function hasPermissionTo( $nameOrAcl, Model $permissible = NULL ): bool;
+    public function hasPermission( $nameOrAcl, Model $permissible = NULL ): bool;
 
     /**
      * @param string|RoleOrPermissionDescriptor $nameOrAcl
@@ -52,16 +52,28 @@ interface User
     public function hasRole( $nameOrAcl, Model $permissible = NULL ): bool;
 
     /**
-     * @param string[]|RoleOrPermissionDescriptor[] ...$nameOrAcl
+     * @param string[]|RoleOrPermissionDescriptor[] ...$codesOrAclList
      * @return bool
      */
-    public function hasAnyRole( ...$nameOrAcl ): bool;
+    public function hasAnyRole( ...$codesOrAclList ): bool;
 
     /**
-     * @param string[]|RoleOrPermissionDescriptor[] ...$nameOrAcl
+     * @param string[]|RoleOrPermissionDescriptor[] ...$codesOrAclList
      * @return bool
      */
-    public function hasAllRoles( ...$nameOrAcl ): bool;
+    public function hasAllRoles( ...$codesOrAclList ): bool;
+
+    /**
+     * @param string[]|RoleOrPermissionDescriptor[] ...$codesOrAclList
+     * @return bool
+     */
+    public function hasAnyPermission( ...$codesOrAclList ): bool;
+
+    /**
+     * @param string[]|RoleOrPermissionDescriptor[] ...$codesOrAclList
+     * @return bool
+     */
+    public function hasAllPermissions( ...$codesOrAclList ): bool;
 
     /**
      * @return string|int

@@ -9,10 +9,9 @@ namespace Spatie\Permission\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\acl;
-use Spatie\Permission\Contracts\User;
 use Spatie\Permission\Models\AclMap;
 
-class HasRolesAndPermissions extends Model implements User
+trait HasRolesAndPermissions
 {
     use HasRolesPermissibles, HasPermissionsPermissibles, RefreshesPermissionCache;
 
@@ -24,8 +23,95 @@ class HasRolesAndPermissions extends Model implements User
         return AclMap::forUser($this)->hasRoleFor($nameOrAcl, $permissible);
     }
 
-    public function hasAnyRole( ...$nameOrAcl ): bool
+    /**
+     * @inheritdoc
+     */
+    public function hasPermission( $nameOrAcl, Model $permissible = NULL ): bool
     {
-        return AclMap::forUser($this)->hasAnyRole(...$nameOrAcl);
+        return AclMap::forUser($this)->hasPermissionFor($nameOrAcl, $permissible);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasAnyRole( ...$codesOrAclList ): bool
+    {
+        $map = AclMap::forUser($this);
+        // group per permissible
+        $groups = acl::groupByPermissible($codesOrAclList);
+
+        // proceed
+        foreach ( $groups as $data )
+        {
+            if ( $map->hasAnyRoleFor($data['names'], $data['desc']->getPermissibleObject()) )
+            {
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasAllRoles( ...$codesOrAclList ): bool
+    {
+        $map = AclMap::forUser($this);
+        // group per permissible
+        $groups = acl::groupByPermissible($codesOrAclList);
+
+        // proceed
+        foreach ( $groups as $data )
+        {
+            if ( ! $map->hasAllRolesFor($data['names'], $data['desc']->getPermissibleObject()) )
+            {
+                return FALSE;
+            }
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasAnyPermission( ...$codesOrAclList ): bool
+    {
+        $map = AclMap::forUser($this);
+        // group per permissible
+        $groups = acl::groupByPermissible($codesOrAclList);
+
+        // proceed
+        foreach ( $groups as $data )
+        {
+            if ( $map->hasAnyPermissionFor($data['names'], $data['desc']->getPermissibleObject()) )
+            {
+                return TRUE;
+            }
+        }
+
+        return FALSE;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function hasAllPermissions( ...$codesOrAclList ): bool
+    {
+        $map = AclMap::forUser($this);
+        // group per permissible
+        $groups = acl::groupByPermissible($codesOrAclList);
+
+        // proceed
+        foreach ( $groups as $data )
+        {
+            if ( ! $map->hasAllPermissionsFor($data['names'], $data['desc']->getPermissibleObject()) )
+            {
+                return FALSE;
+            }
+        }
+
+        return TRUE;
     }
 }
