@@ -186,4 +186,12 @@ class RoleOrPermissionDescriptor
     {
         return $usersPermissiblesRecord->fill($this->getAttributes());
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function __toString()
+    {
+        return $this->getCode();
+    }
 }
