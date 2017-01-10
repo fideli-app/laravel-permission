@@ -39,8 +39,9 @@ class RoleOrPermissionDescriptor
         }
         else
         {
-            $this->meta =
-                (is_array($metaOrCode) && ! $permissible) ? $metaOrCode : Helpers::buildMeta($metaOrCode, $permissible);
+            $this->meta = (is_array($metaOrCode) && ! $permissible)
+                ? $metaOrCode
+                : Helpers::buildMeta($metaOrCode, $permissible);
         }
     }
 
