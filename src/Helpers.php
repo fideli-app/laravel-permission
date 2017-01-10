@@ -23,11 +23,26 @@ abstract class Helpers
         $permissible = '(' . self::stringifyPermissible($permissible) . ')';
         if ( is_array($roleOrPermissionName) )
         {
-            return array_map(function ( $name ) use ( $permissible ) { return $name . $permissible; },
-                $roleOrPermissionName);
+            return array_map(
+                function ( $name ) use ( $permissible ) { return $name . $permissible; },
+                $roleOrPermissionName
+            );
         }
 
         return $roleOrPermissionName . $permissible;
+    }
+
+    /**
+     * @param string $name
+     * @param string|null $permissible_type
+     * @param string|null $permissible_id
+     * @return string
+     */
+    public static function compose( string $name, $permissible_type, $permissible_id ): string
+    {
+        if ( ! $permissible_type && ! $permissible_id ) return $name;
+        if ( $permissible_type && $permissible_id ) return $name . '(' . $permissible_type . ':' . $permissible_id . ')';
+        throw new \InvalidArgumentException("Both permissible type nad id must be null or both not null");
     }
 
     /**
@@ -86,9 +101,10 @@ abstract class Helpers
 
     /**
      * @param Model $permissible
-     * @return string|array
+     * @param bool $asArray
+     * @return array|string
      */
-    private function stringifyPermissible( Model $permissible, $asArray = FALSE )
+    public static function stringifyPermissible( Model $permissible, $asArray = FALSE )
     {
         if ( ! ($id = $permissible->getKey()) )
         {

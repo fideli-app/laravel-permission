@@ -39,7 +39,7 @@ abstract class acl
      * @param Model $permissible
      * @return string
      */
-    public function stringify( string $name, Model $permissible ): string
+    public static function stringify( string $name, Model $permissible ): string
     {
         return self::build($name, $permissible)->__toString();
     }
@@ -48,10 +48,40 @@ abstract class acl
      * @param string $code
      * @return RoleOrPermissionDescriptor
      */
-    public function parse( string $code ): RoleOrPermissionDescriptor
+    public static function parse( string $code ): RoleOrPermissionDescriptor
     {
         if ( isset(self::$cache[$code]) ) return self::$cache[$code];
 
         return self::$cache[$code] = new RoleOrPermissionDescriptor($code);
+    }
+
+
+    /**
+     * @param string|array|RoleOrPermissionDescriptor $item
+     * @return RoleOrPermissionDescriptor
+     */
+    public static function cast( $item )
+    {
+        if ( is_array($item) )
+        {
+            if ( count($item) === 1 )
+            {
+                return self::cast($item[0]);
+            }
+            else if ( count($item) === 2 )
+            {
+                if ( $item[1] === NULL ) return self::cast($item[0]);
+                if ( is_string($item[0]) ) return self::build(...$item);
+            }
+        }
+        else if ( $item instanceof RoleOrPermissionDescriptor )
+        {
+            return $item;
+        }
+        else if ( is_string($item) )
+        {
+            return self::parse($item);
+        }
+        throw new \InvalidArgumentException("Invalid ACL item given: {$item}");
     }
 }

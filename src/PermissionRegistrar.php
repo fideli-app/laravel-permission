@@ -6,7 +6,8 @@ use Exception;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
 use Log;
-use Spatie\Permission\Contracts\Permission;
+use Spatie\Permission\Contracts\User;
+use Spatie\Permission\Models\AclMap;
 
 class PermissionRegistrar
 {
@@ -19,11 +20,6 @@ class PermissionRegistrar
      * @var Repository
      */
     protected $cache;
-
-    /**
-     * @var string
-     */
-    protected $cacheKey = 'spatie.permission.cache';
 
     /**
      * @param Gate $gate
@@ -44,13 +40,7 @@ class PermissionRegistrar
     {
         try
         {
-            $this->getPermissions()->map(function ( $permission )
-            {
-                $this->gate->define($permission->name, function ( $user ) use ( $permission )
-                {
-                    return $user->hasPermissionTo($permission);
-                });
-            });
+            AclMap::load($this->cache, $this->gate);
 
             return TRUE;
         }
@@ -63,23 +53,11 @@ class PermissionRegistrar
     }
 
     /**
-     *  Forget the cached permissions.
+     * Forget the cached permissions.
+     * @param User $user
      */
-    public function forgetCachedPermissions()
+    public function forgetCachedPermissions( User $user = NULL )
     {
-        $this->cache->forget($this->cacheKey);
-    }
-
-    /**
-     * Get the current permissions.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection
-     */
-    protected function getPermissions()
-    {
-        return $this->cache->rememberForever($this->cacheKey, function ()
-        {
-            return app(Permission::class)->get();
-        });
+        AclMap::reset($user);
     }
 }
