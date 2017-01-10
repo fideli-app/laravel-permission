@@ -170,6 +170,7 @@ class AclMap implements \Serializable
         $res    = [];
         foreach ( $roles as $role )
         {
+            if ( isset($res[$role]) ) continue;
             if ( $this->_hasRole($role . $suffix) ) $res[$role] = $role;
         }
 
@@ -265,6 +266,7 @@ class AclMap implements \Serializable
         $res    = [];
         foreach ( $permissions as $permission )
         {
+            if ( isset($res[$permission]) ) continue;
             if ( $this->_hasPermission($permission . $suffix, $deep) ) $res[$permission] = $permission;
         }
 
