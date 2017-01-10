@@ -13,9 +13,15 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Exceptions\PermissionMustNotBeEmpty;
 use Spatie\Permission\Helpers;
 
+/**
+ * Class RoleOrPermissionDescriptor
+ * @package Spatie\Permission\Models
+ */
 class RoleOrPermissionDescriptor
 {
+    /** @var array */
     protected $meta;
+    /** @var string */
     protected $code;
 
     /**
@@ -139,11 +145,9 @@ class RoleOrPermissionDescriptor
      */
     public function applyTo( Builder $query, $asPivot = FALSE )
     {
-        $where = $asPivot ? 'wherePivot' : 'where';
+        $callback = $this->getWhere($asPivot);
 
-        return $query->$where('name', $this->getName())
-                     ->$where('permissible_type', $this->getPermissibleType())
-                     ->$where('permissible_id', $this->getPermissibleId());
+        return $callback($query);
     }
 
     /**
@@ -175,11 +179,11 @@ class RoleOrPermissionDescriptor
     }
 
     /**
-     * @param Model $record
+     * @param Model $usersPermissiblesRecord
      * @return Model
      */
-    public function fillIn( Model $record )
+    public function fillIn( Model $usersPermissiblesRecord )
     {
-        return $record->fill($this->getAttributes());
+        return $usersPermissiblesRecord->fill($this->getAttributes());
     }
 }
