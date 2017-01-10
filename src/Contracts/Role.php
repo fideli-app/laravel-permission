@@ -32,7 +32,7 @@ interface Role
      *
      * @throws \Spatie\Permission\Exceptions\RoleDoesNotExist
      */
-    public static function findByName($name);
+    public static function findByName( $name );
 
     /**
      * Determine if the role may perform the given permission.
@@ -41,5 +41,5 @@ interface Role
      *
      * @return bool
      */
-    public function hasPermissionTo($permission);
+    public function hasPermissionTo( $permission );
 }

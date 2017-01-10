@@ -12,8 +12,8 @@ namespace Spatie\Permission\Contracts;
  *
  * @property int $role_id
  * @property int $user_id
- * @property string $target_type
- * @property int $target_id
+ * @property string $permissible_type
+ * @property int $permissible_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  *

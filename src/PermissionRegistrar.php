@@ -2,10 +2,10 @@
 
 namespace Spatie\Permission;
 
-use Log;
 use Exception;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
+use Log;
 use Spatie\Permission\Contracts\Permission;
 
 class PermissionRegistrar
@@ -26,12 +26,12 @@ class PermissionRegistrar
     protected $cacheKey = 'spatie.permission.cache';
 
     /**
-     * @param Gate       $gate
+     * @param Gate $gate
      * @param Repository $cache
      */
-    public function __construct(Gate $gate, Repository $cache)
+    public function __construct( Gate $gate, Repository $cache )
     {
-        $this->gate = $gate;
+        $this->gate  = $gate;
         $this->cache = $cache;
     }
 
@@ -42,18 +42,23 @@ class PermissionRegistrar
      */
     public function registerPermissions()
     {
-        try {
-            $this->getPermissions()->map(function ($permission) {
-                $this->gate->define($permission->name, function ($user) use ($permission) {
+        try
+        {
+            $this->getPermissions()->map(function ( $permission )
+            {
+                $this->gate->define($permission->name, function ( $user ) use ( $permission )
+                {
                     return $user->hasPermissionTo($permission);
                 });
             });
 
-            return true;
-        } catch (Exception $e) {
+            return TRUE;
+        }
+        catch ( Exception $e )
+        {
             Log::alert('Could not register permissions');
 
-            return false;
+            return FALSE;
         }
     }
 
@@ -72,7 +77,8 @@ class PermissionRegistrar
      */
     protected function getPermissions()
     {
-        return $this->cache->rememberForever($this->cacheKey, function () {
+        return $this->cache->rememberForever($this->cacheKey, function ()
+        {
             return app(Permission::class)->get();
         });
     }

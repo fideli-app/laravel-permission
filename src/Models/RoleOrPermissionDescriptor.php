@@ -9,6 +9,7 @@ namespace Spatie\Permission\Models;
 
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Exceptions\PermissionMustNotBeEmpty;
 use Spatie\Permission\Helpers;
 
@@ -20,19 +21,20 @@ class RoleOrPermissionDescriptor
     /**
      * RoleOrPermissionDescriptor constructor.
      * @param string|array $metaOrCode
-     * @param Model $target
+     * @param Model $permissible
      */
-    public function __construct( $metaOrCode, Model $target = NULL )
+    public function __construct( $metaOrCode, Model $permissible = NULL )
     {
         if ( ! $metaOrCode ) throw new PermissionMustNotBeEmpty();
 
-        if ( is_string($metaOrCode) && ! $target )
+        if ( is_string($metaOrCode) && ! $permissible )
         {
             $this->code = $metaOrCode;
         }
         else
         {
-            $this->meta = (is_array($metaOrCode) && ! $target) ? $metaOrCode : Helpers::buildMeta($metaOrCode, $target);
+            $this->meta =
+                (is_array($metaOrCode) && ! $permissible) ? $metaOrCode : Helpers::buildMeta($metaOrCode, $permissible);
         }
     }
 
@@ -42,10 +44,10 @@ class RoleOrPermissionDescriptor
      */
     public static function fromPivot( Model $pivotOwner ): RoleOrPermissionDescriptor
     {
-        $hasTarget = ($type = $pivotOwner->target_type) && ($id = $pivotOwner->target_id);
-        $meta      = [
-            'name'   => $pivotOwner->name,
-            'target' => $hasTarget ? compact('type', 'id') : NULL
+        $hasPermissible = ($type = $pivotOwner->permissible_type) && ($id = $pivotOwner->permissible_id);
+        $meta           = [
+            'name'        => $pivotOwner->name,
+            'permissible' => $hasPermissible ? compact('type', 'id') : NULL
         ];
 
         return new self($meta);
@@ -62,18 +64,18 @@ class RoleOrPermissionDescriptor
     }
 
     /**
-     * @param bool $resolveTarget
+     * @param bool $resolvePermissible
      * @return array
      */
-    public function getMeta( $resolveTarget = FALSE ): array
+    public function getMeta( $resolvePermissible = FALSE ): array
     {
         if ( ! $this->meta )
         {
-            $this->meta = Helpers::parse($this->code, $resolveTarget);
+            $this->meta = Helpers::parse($this->code, $resolvePermissible);
         }
-        else if ( $resolveTarget )
+        else if ( $resolvePermissible )
         {
-            Helpers::resolveTarget($this->meta['target']);
+            Helpers::resolvePermissible($this->meta['permissible']);
         }
 
         return $this->meta;
@@ -83,43 +85,43 @@ class RoleOrPermissionDescriptor
      * @param bool $resolve
      * @return array|null
      */
-    public function getTarget( $resolve = FALSE )
+    public function getPermissible( $resolve = FALSE )
     {
-        return $this->getMeta($resolve)['target'];
+        return $this->getMeta($resolve)['permissible'];
     }
 
     /**
      * @return null|Model
      */
-    public function getTargetObject()
+    public function getPermissibleObject()
     {
-        $target = $this->getTarget(TRUE);
+        $permissible = $this->getPermissible(TRUE);
 
-        return $target ? $target['object'] : NULL;
+        return $permissible ? $permissible['object'] : NULL;
     }
 
     /**
      * @return string|null
      */
-    public function getTargetType(): string
+    public function getPermissibleType(): string
     {
-        return ($target = $this->getTarget()) ? $target['type'] : NULL;
+        return ($permissible = $this->getPermissible()) ? $permissible['type'] : NULL;
     }
 
     /**
      * @return string|int|null
      */
-    public function getTargetId()
+    public function getPermissibleId()
     {
-        return ($target = $this->getTarget()) ? $target['id'] : NULL;
+        return ($permissible = $this->getPermissible()) ? $permissible['id'] : NULL;
     }
 
     /**
      * @return bool
      */
-    public function hasTarget(): bool
+    public function hasPermissible(): bool
     {
-        return $this->getTarget() !== NULL;
+        return $this->getPermissible() !== NULL;
     }
 
     /**
@@ -140,8 +142,8 @@ class RoleOrPermissionDescriptor
         $where = $asPivot ? 'wherePivot' : 'where';
 
         return $query->$where('name', $this->getName())
-                     ->$where('target_type', $this->getTargetType())
-                     ->$where('target_id', $this->getTargetId());
+                     ->$where('permissible_type', $this->getPermissibleType())
+                     ->$where('permissible_id', $this->getPermissibleId());
     }
 
     /**
@@ -155,8 +157,8 @@ class RoleOrPermissionDescriptor
         return function ( $query ) use ( $where )
         {
             return $query->$where('name', $this->getName())
-                         ->$where('target_type', $this->getTargetType())
-                         ->$where('target_id', $this->getTargetId());
+                         ->$where('permissible_type', $this->getPermissibleType())
+                         ->$where('permissible_id', $this->getPermissibleId());
         };
     }
 
@@ -166,9 +168,9 @@ class RoleOrPermissionDescriptor
     public function getAttributes()
     {
         return [
-            'name'        => $this->getName(),
-            'target_type' => $this->getTargetType(),
-            'target_id'   => $this->getTargetId(),
+            'name'             => $this->getName(),
+            'permissible_type' => $this->getPermissibleType(),
+            'permissible_id'   => $this->getPermissibleId(),
         ];
     }
 

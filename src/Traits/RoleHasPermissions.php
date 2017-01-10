@@ -13,11 +13,12 @@ trait RoleHasPermissions
      *
      * @return RoleHasPermissions
      */
-    public function givePermissionTo(...$permissions)
+    public function givePermissionTo( ...$permissions )
     {
         $permissions = collect($permissions)
             ->flatten()
-            ->map(function ($permission) {
+            ->map(function ( $permission )
+            {
                 return $this->getStoredPermission($permission);
             })
             ->all();
@@ -36,7 +37,7 @@ trait RoleHasPermissions
      *
      * @return $this
      */
-    public function syncPermissions(...$permissions)
+    public function syncPermissions( ...$permissions )
     {
         $this->permissions()->detach();
 
@@ -50,7 +51,7 @@ trait RoleHasPermissions
      *
      * @return RoleHasPermissions
      */
-    public function revokePermissionTo($permission)
+    public function revokePermissionTo( $permission )
     {
         $this->permissions()->detach($this->getStoredPermission($permission));
 
@@ -64,13 +65,15 @@ trait RoleHasPermissions
      *
      * @return Permission
      */
-    protected function getStoredPermission($permissions)
+    protected function getStoredPermission( $permissions )
     {
-        if (is_string($permissions)) {
+        if ( is_string($permissions) )
+        {
             return app(Permission::class)->findByName($permissions);
         }
 
-        if (is_array($permissions)) {
+        if ( is_array($permissions) )
+        {
             return app(Permission::class)->whereIn('name', $permissions)->get();
         }
 

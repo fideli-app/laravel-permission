@@ -13,35 +13,36 @@ abstract class Helpers
 {
     /**
      * @param string|string[] $roleOrPermissionName
-     * @param Model|NULL $target
+     * @param Model|NULL $permissible
      * @return string|string[]
      */
-    public static function stringify( $roleOrPermissionName, Model $target = NULL )
+    public static function stringify( $roleOrPermissionName, Model $permissible = NULL )
     {
-        if ( ! $target ) return $roleOrPermissionName;
+        if ( ! $permissible ) return $roleOrPermissionName;
 
-        $target = '(' . self::stringifyTarget($target) . ')';
+        $permissible = '(' . self::stringifyPermissible($permissible) . ')';
         if ( is_array($roleOrPermissionName) )
         {
-            return array_map(function ( $name ) use ( $target ) { return $name . $target; }, $roleOrPermissionName);
+            return array_map(function ( $name ) use ( $permissible ) { return $name . $permissible; },
+                $roleOrPermissionName);
         }
 
-        return $roleOrPermissionName . $target;
+        return $roleOrPermissionName . $permissible;
     }
 
     /**
      * @param string $code
-     * @param bool $resolveTarget
+     * @param bool $resolvePermissible
      * @param string $roleOrPermissionName
-     * @param array $target
+     * @param array $permissible
      * @return array
      */
     public static function parse( string $code,
-                                  $resolveTarget = FALSE,
+                                  $resolvePermissible = FALSE,
                                   &$roleOrPermissionName = NULL,
-                                  &$target = NULL ): array
+                                  &$permissible = NULL ): array
     {
-        $roleOrPermissionName = $target = NULL;
+        $roleOrPermissionName = $permissible = NULL;
         if ( strpos($code, '(') !== FALSE )
         {
             if ( ! preg_match('/^([a-z_]+)\(([^:]+):([^\)]+)\)$/', $code, $matches) )
@@ -49,52 +50,53 @@ abstract class Helpers
                 throw new \InvalidArgumentException("Invalid role/permission code: {$code}");
             }
             $roleOrPermissionName = $matches[1];
-            $target               = ['type' => $matches[2], 'id' => $matches[3]];
-            if ( $resolveTarget ) self::resolveTarget($target);
+            $permissible          = ['type' => $matches[2], 'id' => $matches[3]];
+            if ( $resolvePermissible ) self::resolvePermissible($permissible);
         }
 
-        return ['name' => $roleOrPermissionName, 'target' => $target];
+        return ['name' => $roleOrPermissionName, 'permissible' => $permissible];
     }
 
     /**
-     * @param array|null $target
+     * @param array|null $permissible
      * @return null|Model
      */
-    public static function resolveTarget( &$target )
+    public static function resolvePermissible( &$permissible )
     {
-        if ( $target === NULL ) return NULL;
-        if ( ! isset($target['object']) )
+        if ( $permissible === NULL ) return NULL;
+        if ( ! isset($permissible['object']) )
         {
-            $class            = self::classForKey($target['type']);
-            $target['object'] = $class::findOrFail($target['id']);
+            $class                 = self::classForKey($permissible['type']);
+            $permissible['object'] = $class::findOrFail($permissible['id']);
         }
 
-        return $target['object'];
+        return $permissible['object'];
     }
 
     /**
      * @param string $roleOrPermissionName
-     * @param Model|NULL $target
+     * @param Model|NULL $permissible
      * @return array
      */
-    public static function buildMeta( string $roleOrPermissionName, Model $target = NULL ): array
+    public static function buildMeta( string $roleOrPermissionName, Model $permissible = NULL ): array
     {
-        return ['name' => $roleOrPermissionName, 'target' => $target ? self::stringifyTarget($target, TRUE) : NULL];
+        return ['name'        => $roleOrPermissionName,
+                'permissible' => $permissible ? self::stringifyPermissible($permissible, TRUE) : NULL];
     }
 
     /**
-     * @param Model $target
+     * @param Model $permissible
      * @return string|array
      */
-    private function stringifyTarget( Model $target, $asArray = FALSE )
+    private function stringifyPermissible( Model $permissible, $asArray = FALSE )
     {
-        if ( ! ($id = $target->getKey()) )
+        if ( ! ($id = $permissible->getKey()) )
         {
-            throw new \InvalidArgumentException("Target must be an existing record");
+            throw new \InvalidArgumentException("Permissible must be an existing record");
         }
-        if ( $asArray ) return ['type' => self::keyForClass($target), 'id' => $id, 'object' => $target];
+        if ( $asArray ) return ['type' => self::keyForClass($permissible), 'id' => $id, 'object' => $permissible];
 
-        return self::keyForClass($target) . ':' . $id;
+        return self::keyForClass($permissible) . ':' . $id;
     }
 
     /**

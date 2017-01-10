@@ -33,5 +33,5 @@ interface Permission
      *
      * @throws \Spatie\Permission\Exceptions\PermissionDoesNotExist
      */
-    public static function findByName($name);
+    public static function findByName( $name );
 }

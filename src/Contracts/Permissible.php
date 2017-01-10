@@ -20,6 +20,7 @@ interface Permissible
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
     public function usersRoles();
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\MorphMany
      */
@@ -29,11 +30,11 @@ interface Permissible
      * @param User $user
      * @return Permission[]
      */
-    public function permissionsForUser( User $user);
+    public function permissionsForUser( User $user );
 
     /**
      * @param User $user
      * @return Role[]
      */
-    public function rolesForUser( User $user);
+    public function rolesForUser( User $user );
 }
