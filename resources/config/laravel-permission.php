@@ -42,8 +42,8 @@ return [
 
         'role' => Spatie\Permission\Models\Role::class,
 
-        'user_has_roles'       => \Spatie\Permission\Models\UsersRoles::class,
-        'user_has_permissions' => \Spatie\Permission\Models\UsersPermissions::class,
+        'user_has_roles'       => Spatie\Permission\Models\UsersRoles::class,
+        'user_has_permissions' => Spatie\Permission\Models\UsersPermissions::class,
 
     ],
 
