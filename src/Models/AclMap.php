@@ -12,7 +12,6 @@ use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\acl;
-use Spatie\Permission\Contracts\User;
 use Spatie\Permission\Helpers;
 
 /**
@@ -290,40 +289,40 @@ class AclMap implements \Serializable
     }
 
     /**
-     * @param User $user
+     * @param int|string $user_id
      * @return AclMap
      */
-    public static function forUser( User $user ): AclMap
+    public static function forUserId( $user_id ): AclMap
     {
-        if ( ! ($key = '' . $user->getKey()) )
+        if ( ! ($key = '' . $user_id) )
         {
-            throw new \InvalidArgumentException('Cannot get an ACL map for a not saved user (no PK)');
+            throw new \InvalidArgumentException('Cannot get an ACL map without ID');
         }
         if ( isset(self::$instances[$key]) ) return self::$instances[$key];
 
         return self::$instances[$key] = self::$cache->rememberForever(
-            self::cacheKeyFor($user), function () use ( $user ) { new self($user); }
+            self::cacheKeyFor($user_id), function () use ( $user_id ) { new self($user_id); }
         );
     }
 
     /**
-     * @param User $user
+     * @param string|int $user_id
      * @return string
      */
-    protected static function cacheKeyFor( User $user = NULL ): string
+    protected static function cacheKeyFor( $user_id = NULL ): string
     {
-        return self::$cachePrefix . ($user ? '/user/' . $user->getKey() : '');
+        return self::$cachePrefix . ($user_id ? '/user/' . $user_id : '');
     }
 
 
     /**
-     * @param User|NULL $user
+     * @param int|string|NULL $user_id
      */
-    public static function reset( User $user = NULL )
+    public static function reset( $user_id = NULL )
     {
-        if ( $user )
+        if ( $user_id )
         {
-            if ( ($acl = self::instanceForUser($user)) )
+            if ( ($acl = self::instanceForUserId($user_id)) )
             {
                 $acl->hasPermissionCache = [];
                 $acl->roles              = NULL;
@@ -342,21 +341,21 @@ class AclMap implements \Serializable
     }
 
     /**
-     * @param User|NULL $user
+     * @param int|string|NULL $user_id
      */
-    public static function forget( User $user = NULL )
+    public static function forget( $user_id = NULL )
     {
-        self::$cache->forget(self::cacheKeyFor($user));
+        self::$cache->forget(self::cacheKeyFor($user_id));
     }
 
 
     /**
-     * @param User $user
+     * @param string|int $user_id
      * @return AclMap|NULL
      */
-    protected static function instanceForUser( User $user )
+    protected static function instanceForUserId( $user_id )
     {
-        $key = '' . $user->getKey();
+        $key = '' . $user_id;
 
         return isset(self::$instances[$key]) ? self::$instances[$key] : NULL;
     }
@@ -446,10 +445,14 @@ class AclMap implements \Serializable
             // define rules within the gate
             array_walk(self::$permissionRoles, function ( $dummy, $permission ) use ( $gate )
             {
-                $gate->define($permission, function ( User $user, Model $permissible = NULL ) use ( $permission )
-                {
-                    return self::forUser($user)->hasPermissionFor($permission, $permissible);
-                });
+                $gate->define(
+                    $permission,
+                    function ( Model $user, Model $permissible = NULL ) use ( $permission )
+                    {
+                        return self::forUserId($user->getKey())
+                                   ->hasPermissionFor($permission, $permissible);
+                    }
+                );
             });
         }
     }

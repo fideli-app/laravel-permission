@@ -2,6 +2,7 @@
 
 namespace Spatie\Permission\Traits;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Permission\PermissionRegistrar;
 
 trait RefreshesPermissionCache
@@ -29,6 +30,9 @@ trait RefreshesPermissionCache
      */
     public function forgetCachedPermissions()
     {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $user_id = method_exists($this, 'user') && $this->user() instanceof BelongsTo
+            ? $this->user_id
+            : NULL;
+        app(PermissionRegistrar::class)->forgetCachedPermissions($user_id);
     }
 }

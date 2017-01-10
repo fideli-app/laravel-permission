@@ -5,6 +5,7 @@ namespace Spatie\Permission;
 use Exception;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Database\Eloquent\Model;
 use Log;
 use Spatie\Permission\Contracts\User;
 use Spatie\Permission\Models\AclMap;
@@ -54,10 +55,15 @@ class PermissionRegistrar
 
     /**
      * Forget the cached permissions.
-     * @param User $user
+     * @param User|int|string $user
      */
-    public function forgetCachedPermissions( User $user = NULL )
+    public function forgetCachedPermissions( $user = NULL )
     {
+        if ( $user !== NULL )
+        {
+            $user = $user instanceof Model ? $user->getKey() : $user;
+        }
+        AclMap::forget($user);
         AclMap::reset($user);
     }
 }
