@@ -3,14 +3,23 @@
 namespace Spatie\Permission\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Traits\HasPermissions;
-use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Spatie\Permission\Contracts\Role as RoleContract;
+use Spatie\Permission\Contracts\UsersRoles;
+use Spatie\Permission\Exceptions\RoleDoesNotExist;
 use Spatie\Permission\Traits\RefreshesPermissionCache;
+use Spatie\Permission\Traits\RoleHasPermissions;
 
+/**
+ * Class Role
+ * @package Spatie\Permission\Models
+ *
+ * @property Model[] $users
+ * @property Permission[] $permissions
+ * @property UsersRoles[] $usersPermissibles
+ */
 class Role extends Model implements RoleContract
 {
-    use HasPermissions;
+    use RoleHasPermissions;
     use RefreshesPermissionCache;
 
     /**
@@ -25,7 +34,7 @@ class Role extends Model implements RoleContract
      *
      * @param array $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct( array $attributes = [] )
     {
         parent::__construct($attributes);
 
@@ -46,16 +55,11 @@ class Role extends Model implements RoleContract
     }
 
     /**
-     * A role may be assigned to various users.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function users()
+    public function usersPermissibles()
     {
-        return $this->belongsToMany(
-            config('auth.model') ?: config('auth.providers.users.model'),
-            config('laravel-permission.table_names.user_has_roles')
-        );
+        return $this->hasMany(config('laravel-permission.models.user_has_roles'));
     }
 
     /**
@@ -67,11 +71,12 @@ class Role extends Model implements RoleContract
      *
      * @return Role
      */
-    public static function findByName($name)
+    public static function findByName( $name )
     {
         $role = static::where('name', $name)->first();
 
-        if (! $role) {
+        if ( ! $role )
+        {
             throw new RoleDoesNotExist();
         }
 
@@ -79,15 +84,16 @@ class Role extends Model implements RoleContract
     }
 
     /**
-     * Determine if the user may perform the given permission.
+     * Determine if the role may perform the given permission.
      *
      * @param string|Permission $permission
      *
      * @return bool
      */
-    public function hasPermissionTo($permission)
+    public function hasPermissionTo( $permission )
     {
-        if (is_string($permission)) {
+        if ( is_string($permission) )
+        {
             $permission = app(Permission::class)->findByName($permission);
         }
 

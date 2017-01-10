@@ -4,14 +4,14 @@ namespace Spatie\Permission\Traits;
 
 use Spatie\Permission\Contracts\Permission;
 
-trait HasPermissions
+trait RoleHasPermissions
 {
     /**
      * Grant the given permission(s) to a role.
      *
      * @param string|array|Permission|\Illuminate\Support\Collection $permissions
      *
-     * @return HasPermissions
+     * @return RoleHasPermissions
      */
     public function givePermissionTo(...$permissions)
     {
@@ -48,7 +48,7 @@ trait HasPermissions
      *
      * @param $permission
      *
-     * @return HasPermissions
+     * @return RoleHasPermissions
      */
     public function revokePermissionTo($permission)
     {

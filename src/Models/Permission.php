@@ -3,10 +3,19 @@
 namespace Spatie\Permission\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Permission\Traits\RefreshesPermissionCache;
-use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Contracts\Permission as PermissionContract;
+use Spatie\Permission\Contracts\UsersPermissions;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
+use Spatie\Permission\Traits\RefreshesPermissionCache;
 
+/**
+ * Class Permission
+ * @package Spatie\Permission\Models
+ *
+ * @property Model[] $users
+ * @property Role[] $roles
+ * @property UsersPermissions[] $usersPermissibles
+ */
 class Permission extends Model implements PermissionContract
 {
     use RefreshesPermissionCache;
@@ -23,7 +32,7 @@ class Permission extends Model implements PermissionContract
      *
      * @param array $attributes
      */
-    public function __construct(array $attributes = [])
+    public function __construct( array $attributes = [] )
     {
         parent::__construct($attributes);
 
@@ -44,30 +53,27 @@ class Permission extends Model implements PermissionContract
     }
 
     /**
-     * A permission can be applied to users.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function users()
+    public function usersPermissibles()
     {
-        return $this->belongsToMany(
-            config('auth.model') ?: config('auth.providers.users.model'),
-            config('laravel-permission.table_names.user_has_permissions')
-        );
+        return $this->hasMany(config('laravel-permission.models.user_has_permissions'));
     }
 
     /**
      * Find a permission by its name.
      *
      * @param string $name
+     * @return PermissionContract
      *
      * @throws PermissionDoesNotExist
      */
-    public static function findByName($name)
+    public static function findByName( $name )
     {
         $permission = static::where('name', $name)->first();
 
-        if (! $permission) {
+        if ( ! $permission )
+        {
             throw new PermissionDoesNotExist();
         }
 

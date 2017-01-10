@@ -42,6 +42,9 @@ return [
 
         'role' => Spatie\Permission\Models\Role::class,
 
+        'user_has_roles'       => \Spatie\Permission\Models\UsersRoles::class,
+        'user_has_permissions' => \Spatie\Permission\Models\UsersPermissions::class,
+
     ],
 
     /*
@@ -58,7 +61,7 @@ return [
         |--------------------------------------------------------------------------
         |
         | The table that your application uses for users. This table's model will
-        | be using the "HasRoles" and "HasPermissions" traits.
+        | be using the "HasRoles" and "RoleHasPermissions" traits.
         |
         */
         'users' => 'users',

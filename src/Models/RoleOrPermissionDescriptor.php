@@ -7,6 +7,7 @@
 namespace Spatie\Permission\Models;
 
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\Permission\Exceptions\PermissionMustNotBeEmpty;
 use Spatie\Permission\Helpers;
@@ -141,6 +142,22 @@ class RoleOrPermissionDescriptor
         return $query->$where('name', $this->getName())
                      ->$where('target_type', $this->getTargetType())
                      ->$where('target_id', $this->getTargetId());
+    }
+
+    /**
+     * @param bool $asPivot
+     * @return Closure
+     */
+    public function getWhere( $asPivot = FALSE ): Closure
+    {
+        $where = $asPivot ? 'wherePivot' : 'where';
+
+        return function ( $query ) use ( $where )
+        {
+            return $query->$where('name', $this->getName())
+                         ->$where('target_type', $this->getTargetType())
+                         ->$where('target_id', $this->getTargetId());
+        };
     }
 
     /**

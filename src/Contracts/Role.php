@@ -2,6 +2,14 @@
 
 namespace Spatie\Permission\Contracts;
 
+/**
+ * Interface Role
+ * @package Spatie\Permission\Contracts
+ *
+ * @property string $name
+ * @property Permission[] $permissions
+ * @property UsersRoles[] $usersPermissibles
+ */
 interface Role
 {
     /**
@@ -12,23 +20,22 @@ interface Role
     public function permissions();
 
     /**
-     * A role may be assigned to various users.
-     *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function users();
+    public function usersPermissibles();
 
     /**
      * Find a role by its name.
      *
      * @param string $name
+     * @return Role
      *
-     * @throws RoleDoesNotExist
+     * @throws \Spatie\Permission\Exceptions\RoleDoesNotExist
      */
     public static function findByName($name);
 
     /**
-     * Determine if the user may perform the given permission.
+     * Determine if the role may perform the given permission.
      *
      * @param string|Permission $permission
      *
